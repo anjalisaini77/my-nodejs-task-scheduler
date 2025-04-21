@@ -1,0 +1,40 @@
+name: Deploy to AWS Elastic Beanstalk
+
+on:
+  push:
+    branches:
+      - main  # Trigger deployment when pushed to main branch
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Set up AWS CLI
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ secrets.AWS_REGION }}
+
+      - name: Log in to Amazon ECR
+        run: |
+          aws ecr get-login-password --region ${{ secrets.AWS_REGION }} | docker login --username AWS --password-stdin ${{ secrets.AWS_ECR_REPO_URI }}
+
+      - name: Build Docker image
+        run: |
+          docker build -t ${{ secrets.AWS_ECR_REPO_URI }}:$GITHUB_SHA .
+
+      - name: Push Docker image to ECR
+        run: |
+          docker push ${{ secrets.AWS_ECR_REPO_URI }}:$GITHUB_SHA
+
+      - name: Deploy to Elastic Beanstalk
+        run: |
+          aws elasticbeanstalk update-environment \
+            --application-name ${{ secrets.AWS_ELASTIC_BEANSTALK_APP_NAME }} \
+            --environment-name ${{ secrets.AWS_ELASTIC_BEANSTALK_ENV_NAME }} \
+            --version-label $GITHUB_SHA
