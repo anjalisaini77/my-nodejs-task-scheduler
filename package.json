@@ -1,0 +1,19 @@
+{
+  "name": "task-scheduler",
+  "version": "1.0.0",
+  "description": "Task Scheduler API with cron jobs",
+  "main": "app.js",
+  "scripts": {
+    "start": "node app.js",
+    "dev": "nodemon app.js"
+  },
+  "dependencies": {
+    "express": "^4.17.1",
+    "node-schedule": "^1.3.2"
+  },
+  "devDependencies": {
+    "nodemon": "^2.0.15"
+  },
+  "author": "Anjali Saini",
+  "license": "ISC"
+}
